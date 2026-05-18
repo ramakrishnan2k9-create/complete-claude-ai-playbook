@@ -1,0 +1,1472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude AI — Master Guide & Implementation Playbook</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,600;0,900;1,300&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #0d1b2a;
+  --navy2: #1a2e45;
+  --teal: #00b4a2;
+  --teal-light: #e0f7f5;
+  --amber: #f5a623;
+  --amber-light: #fff8ea;
+  --rose: #e84393;
+  --white: #ffffff;
+  --offwhite: #f7f9fc;
+  --gray100: #eef1f6;
+  --gray300: #c6cdd8;
+  --gray500: #8896aa;
+  --gray700: #3d4f63;
+  --text: #1a2e45;
+  --sidebar-w: 270px;
+  --content-max: 820px;
+  --radius: 10px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: 'DM Sans', sans-serif; background: var(--offwhite); color: var(--text); line-height: 1.7; }
+
+/* ─── SIDEBAR ─── */
+#sidebar {
+  position: fixed; top: 0; left: 0; width: var(--sidebar-w); height: 100vh;
+  background: var(--navy); overflow-y: auto; z-index: 100;
+  display: flex; flex-direction: column;
+  scrollbar-width: thin; scrollbar-color: var(--navy2) var(--navy);
+}
+#sidebar::-webkit-scrollbar { width: 4px; }
+#sidebar::-webkit-scrollbar-thumb { background: var(--navy2); }
+
+.sidebar-brand {
+  padding: 24px 20px 16px;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+.sidebar-brand .logo-pill {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--teal); color: #fff; font-size: 11px; font-weight: 600;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  padding: 4px 10px; border-radius: 20px; margin-bottom: 10px;
+}
+.sidebar-brand h2 {
+  font-family: 'Fraunces', serif; font-size: 18px; color: #fff;
+  font-weight: 600; line-height: 1.3;
+}
+.sidebar-brand p { font-size: 11px; color: var(--gray500); margin-top: 4px; }
+
+.sidebar-nav { padding: 12px 0 24px; flex: 1; }
+.nav-section-label {
+  font-size: 9px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--gray500); padding: 16px 20px 6px;
+}
+.nav-link {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 20px; font-size: 12.5px; color: rgba(255,255,255,.65);
+  text-decoration: none; cursor: pointer; transition: all .2s;
+  border-left: 3px solid transparent;
+}
+.nav-link:hover, .nav-link.active {
+  color: #fff; background: rgba(255,255,255,.05);
+  border-left-color: var(--teal);
+}
+.nav-num {
+  font-size: 10px; font-weight: 600; color: var(--teal);
+  background: rgba(0,180,162,.15); width: 22px; height: 22px;
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+
+/* ─── MAIN ─── */
+#main { margin-left: var(--sidebar-w); }
+
+.hero {
+  background: linear-gradient(135deg, var(--navy) 0%, #1a3a5c 60%, #0a3d3a 100%);
+  padding: 80px 60px 70px; position: relative; overflow: hidden;
+}
+.hero::before {
+  content: ''; position: absolute; top: -80px; right: -80px;
+  width: 400px; height: 400px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(0,180,162,.25) 0%, transparent 70%);
+}
+.hero::after {
+  content: ''; position: absolute; bottom: -60px; left: 30%;
+  width: 250px; height: 250px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(245,166,35,.12) 0%, transparent 70%);
+}
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(0,180,162,.2); border: 1px solid rgba(0,180,162,.4);
+  color: var(--teal); font-size: 11px; font-weight: 600; letter-spacing: 1.5px;
+  text-transform: uppercase; padding: 5px 14px; border-radius: 20px; margin-bottom: 20px;
+}
+.hero h1 {
+  font-family: 'Fraunces', serif; font-size: 52px; font-weight: 900;
+  color: #fff; line-height: 1.1; max-width: 680px;
+  position: relative; z-index: 1;
+}
+.hero h1 em { color: var(--teal); font-style: italic; }
+.hero-sub {
+  font-size: 17px; color: rgba(255,255,255,.65); margin-top: 16px;
+  max-width: 560px; position: relative; z-index: 1;
+}
+.hero-badges {
+  display: flex; gap: 12px; margin-top: 28px; flex-wrap: wrap;
+  position: relative; z-index: 1;
+}
+.hero-badge {
+  background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2);
+  color: rgba(255,255,255,.8); font-size: 12px; padding: 5px 14px; border-radius: 20px;
+}
+
+/* ─── CONTENT ─── */
+.content-wrap {
+  max-width: var(--content-max); margin: 0 auto; padding: 60px 48px;
+}
+section { margin-bottom: 72px; }
+.section-header {
+  display: flex; align-items: flex-start; gap: 16px; margin-bottom: 28px;
+}
+.section-num {
+  font-family: 'Fraunces', serif; font-size: 48px; font-weight: 900;
+  color: var(--gray100); line-height: 1; flex-shrink: 0; user-select: none;
+}
+.section-title-block h2 {
+  font-family: 'Fraunces', serif; font-size: 30px; font-weight: 600;
+  color: var(--navy); line-height: 1.2;
+}
+.section-title-block .section-desc {
+  font-size: 14px; color: var(--gray500); margin-top: 4px;
+}
+
+h3 {
+  font-family: 'Fraunces', serif; font-size: 20px; font-weight: 600;
+  color: var(--navy2); margin: 32px 0 12px;
+}
+h4 {
+  font-size: 14px; font-weight: 600; color: var(--navy2);
+  text-transform: uppercase; letter-spacing: .8px; margin: 24px 0 8px;
+}
+p { font-size: 15px; color: var(--gray700); margin-bottom: 14px; line-height: 1.75; }
+ul, ol { padding-left: 22px; margin-bottom: 14px; }
+li { font-size: 15px; color: var(--gray700); margin-bottom: 6px; line-height: 1.65; }
+li strong { color: var(--navy2); }
+
+/* ─── CARDS ─── */
+.card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 20px 0; }
+.card-grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+.card {
+  background: var(--white); border: 1px solid var(--gray100);
+  border-radius: var(--radius); padding: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.04);
+  transition: box-shadow .2s, transform .2s;
+}
+.card:hover { box-shadow: 0 6px 20px rgba(0,0,0,.08); transform: translateY(-2px); }
+.card-icon {
+  width: 40px; height: 40px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; margin-bottom: 12px;
+}
+.card h4 { margin: 0 0 6px; text-transform: none; letter-spacing: 0; font-size: 15px; }
+.card p { font-size: 13px; margin: 0; }
+.bg-teal { background: var(--teal-light); }
+.bg-amber { background: var(--amber-light); }
+.bg-rose { background: rgba(232,67,147,.08); }
+.bg-navy { background: rgba(13,27,42,.06); }
+.bg-purple { background: rgba(139,92,246,.08); }
+.bg-green { background: rgba(16,185,129,.08); }
+
+/* ─── CALLOUTS ─── */
+.callout {
+  border-radius: var(--radius); padding: 18px 22px;
+  margin: 20px 0; display: flex; gap: 14px;
+}
+.callout-icon { font-size: 22px; flex-shrink: 0; margin-top: 1px; }
+.callout-body h5 { font-size: 13px; font-weight: 600; margin-bottom: 5px; }
+.callout-body p, .callout-body li { font-size: 13.5px; margin-bottom: 4px; }
+.callout-body ul { margin: 6px 0 0; }
+.tip { background: var(--teal-light); border-left: 4px solid var(--teal); }
+.tip .callout-body h5 { color: #007a70; }
+.warning { background: #fff4e5; border-left: 4px solid var(--amber); }
+.warning .callout-body h5 { color: #b57300; }
+.mistake { background: rgba(232,67,147,.06); border-left: 4px solid var(--rose); }
+.mistake .callout-body h5 { color: #b0005a; }
+.note { background: rgba(99,102,241,.06); border-left: 4px solid #6366f1; }
+.note .callout-body h5 { color: #4338ca; }
+
+/* ─── TABLES ─── */
+.table-wrap { overflow-x: auto; margin: 20px 0; border-radius: var(--radius); border: 1px solid var(--gray100); }
+table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+th {
+  background: var(--navy); color: #fff; text-align: left;
+  padding: 12px 16px; font-size: 12px; font-weight: 600; letter-spacing: .5px;
+}
+td { padding: 11px 16px; border-bottom: 1px solid var(--gray100); color: var(--gray700); }
+tr:last-child td { border-bottom: none; }
+tr:nth-child(even) td { background: var(--offwhite); }
+.tag {
+  display: inline-block; padding: 2px 9px; border-radius: 10px;
+  font-size: 11px; font-weight: 600; line-height: 1.8;
+}
+.tag-teal { background: var(--teal-light); color: #007a70; }
+.tag-amber { background: var(--amber-light); color: #8a5e00; }
+.tag-rose { background: rgba(232,67,147,.1); color: #8b0044; }
+.tag-navy { background: var(--gray100); color: var(--navy); }
+
+/* ─── CODE ─── */
+code {
+  font-family: 'DM Mono', monospace; font-size: 13px;
+  background: var(--gray100); color: var(--navy); padding: 2px 6px; border-radius: 4px;
+}
+pre {
+  background: var(--navy); border-radius: var(--radius);
+  padding: 20px; overflow-x: auto; margin: 18px 0;
+}
+pre code {
+  background: none; color: #a8d8c8; font-size: 13px; padding: 0;
+  line-height: 1.65;
+}
+
+/* ─── DIVIDER ─── */
+.divider { border: none; border-top: 2px solid var(--gray100); margin: 48px 0; }
+
+/* ─── STEP LIST ─── */
+.steps { counter-reset: step; margin: 20px 0; }
+.step {
+  display: flex; gap: 16px; margin-bottom: 20px;
+  background: var(--white); border: 1px solid var(--gray100);
+  border-radius: var(--radius); padding: 18px 20px;
+}
+.step-num {
+  counter-increment: step; font-family: 'Fraunces', serif;
+  font-size: 24px; font-weight: 900; color: var(--teal);
+  flex-shrink: 0; line-height: 1; margin-top: 2px;
+}
+.step-num::before { content: counter(step); }
+.step-body h5 { font-size: 14px; font-weight: 600; color: var(--navy2); margin-bottom: 4px; }
+.step-body p { font-size: 13.5px; margin: 0; }
+
+/* ─── COMPARE ─── */
+.compare { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 20px 0; }
+.compare-bad, .compare-good {
+  border-radius: var(--radius); padding: 16px; font-size: 13.5px;
+}
+.compare-bad { background: rgba(239,68,68,.06); border: 1px solid rgba(239,68,68,.2); }
+.compare-good { background: rgba(16,185,129,.06); border: 1px solid rgba(16,185,129,.2); }
+.compare-label {
+  font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.compare-bad .compare-label { color: #dc2626; }
+.compare-good .compare-label { color: #059669; }
+
+/* ─── ROADMAP ─── */
+.roadmap { position: relative; padding-left: 32px; margin: 20px 0; }
+.roadmap::before {
+  content: ''; position: absolute; left: 10px; top: 0; bottom: 0;
+  width: 2px; background: linear-gradient(to bottom, var(--teal), transparent);
+}
+.roadmap-item { position: relative; margin-bottom: 20px; }
+.roadmap-item::before {
+  content: ''; position: absolute; left: -27px; top: 5px;
+  width: 12px; height: 12px; border-radius: 50%;
+  background: var(--teal); border: 3px solid var(--white);
+  box-shadow: 0 0 0 2px var(--teal);
+}
+.roadmap-item h5 { font-size: 14px; font-weight: 600; color: var(--navy2); margin-bottom: 4px; }
+.roadmap-item p { font-size: 13.5px; margin: 0; }
+
+/* ─── STICKY TOC ─── */
+.toc-float {
+  position: fixed; right: 20px; top: 50%; transform: translateY(-50%);
+  display: flex; flex-direction: column; gap: 6px; z-index: 50;
+}
+.toc-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--gray300); cursor: pointer; transition: all .2s;
+  title: '';
+}
+.toc-dot.active, .toc-dot:hover { background: var(--teal); transform: scale(1.5); }
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 900px) {
+  #sidebar { transform: translateX(-100%); }
+  #main { margin-left: 0; }
+  .content-wrap { padding: 40px 24px; }
+  .hero { padding: 48px 24px; }
+  .hero h1 { font-size: 36px; }
+  .card-grid { grid-template-columns: 1fr; }
+  .card-grid-3 { grid-template-columns: 1fr; }
+  .compare { grid-template-columns: 1fr; }
+  .toc-float { display: none; }
+}
+
+/* ─── FEATURE BADGE ─── */
+.feature-list { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+.feature-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--white); border: 1px solid var(--gray100);
+  border-radius: 20px; padding: 5px 12px; font-size: 12.5px; color: var(--gray700);
+}
+.feature-badge::before { content: '✓'; color: var(--teal); font-weight: 700; }
+
+/* ─── STAT HIGHLIGHT ─── */
+.stat-row { display: flex; gap: 16px; margin: 20px 0; flex-wrap: wrap; }
+.stat {
+  flex: 1; min-width: 130px; background: var(--white); border-radius: var(--radius);
+  border: 1px solid var(--gray100); padding: 18px; text-align: center;
+}
+.stat-value { font-family: 'Fraunces', serif; font-size: 32px; font-weight: 900; color: var(--teal); }
+.stat-label { font-size: 11.5px; color: var(--gray500); margin-top: 2px; }
+
+/* ─── FOOTER ─── */
+footer {
+  background: var(--navy); color: rgba(255,255,255,.5);
+  text-align: center; padding: 32px; font-size: 12px; margin-left: 0;
+}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav id="sidebar">
+  <div class="sidebar-brand">
+    <div class="logo-pill">⬡ Anthropic</div>
+    <h2>Claude AI<br>Master Guide</h2>
+    <p>Complete Playbook · 2025 Edition</p>
+  </div>
+  <div class="sidebar-nav">
+    <div class="nav-section-label">Getting Started</div>
+    <a class="nav-link active" href="#intro"><span class="nav-num">1</span>Introduction to Claude AI</a>
+    <a class="nav-link" href="#ecosystem"><span class="nav-num">2</span>Claude Ecosystem Overview</a>
+    <div class="nav-section-label">Core Platform</div>
+    <a class="nav-link" href="#claudeai"><span class="nav-num">3</span>Claude.ai Platform</a>
+    <a class="nav-link" href="#artifacts"><span class="nav-num">4</span>Claude Artifacts</a>
+    <a class="nav-link" href="#code"><span class="nav-num">5</span>Claude Code</a>
+    <div class="nav-section-label">Advanced</div>
+    <a class="nav-link" href="#mcp"><span class="nav-num">6</span>MCP Protocol</a>
+    <a class="nav-link" href="#connectors"><span class="nav-num">7</span>Connectors & Integrations</a>
+    <a class="nav-link" href="#plans"><span class="nav-num">8</span>Plans & Pricing</a>
+    <div class="nav-section-label">Mastery</div>
+    <a class="nav-link" href="#automation"><span class="nav-num">9</span>Automation & Workflows</a>
+    <a class="nav-link" href="#bestpractices"><span class="nav-num">10</span>Best Practices</a>
+    <a class="nav-link" href="#usecases"><span class="nav-num">11</span>Industry Use Cases</a>
+    <a class="nav-link" href="#future"><span class="nav-num">12</span>Future of Claude AI</a>
+    <a class="nav-link" href="#roadmap"><span class="nav-num">13</span>Learning Path</a>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<main id="main">
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-eyebrow">⬡ Complete Implementation Playbook</div>
+  <h1>The Claude AI<br><em>Master Guide</em></h1>
+  <p class="hero-sub">Everything you need — from your first prompt to enterprise-scale AI automation. Beginner-friendly. Business-ready.</p>
+  <div class="hero-badges">
+    <span class="hero-badge">📖 13 Chapters</span>
+    <span class="hero-badge">⚡ Practical Examples</span>
+    <span class="hero-badge">🏗️ Enterprise Workflows</span>
+    <span class="hero-badge">🎯 Pro Tips Throughout</span>
+    <span class="hero-badge">2025 Edition</span>
+  </div>
+</div>
+
+<div class="content-wrap">
+
+<!-- ═══════════════════════════════════════════
+     SECTION 1 – INTRODUCTION
+═══════════════════════════════════════════ -->
+<section id="intro">
+  <div class="section-header">
+    <div class="section-num">01</div>
+    <div class="section-title-block">
+      <h2>Introduction to Claude AI</h2>
+      <p class="section-desc">What it is, where it came from, and why it matters</p>
+    </div>
+  </div>
+
+  <h3>What is Claude AI?</h3>
+  <p>Claude is an AI assistant built by <strong>Anthropic</strong> — a company founded in 2021 with one specific mission: build AI that is <em>safe, reliable, and beneficial</em>. Unlike many AI tools built primarily to generate revenue, Claude was designed from the ground up to be trustworthy and honest. Think of Claude as a brilliant colleague who can read, write, reason, code, analyze data, and have nuanced conversations — all in seconds.</p>
+
+  <div class="stat-row">
+    <div class="stat"><div class="stat-value">200K+</div><div class="stat-label">Token Context Window</div></div>
+    <div class="stat"><div class="stat-value">95+</div><div class="stat-label">Languages Supported</div></div>
+    <div class="stat"><div class="stat-value">3</div><div class="stat-label">Model Tiers (Haiku, Sonnet, Opus)</div></div>
+    <div class="stat"><div class="stat-value">2021</div><div class="stat-label">Anthropic Founded</div></div>
+  </div>
+
+  <h3>Why Claude Was Created — The Anthropic Story</h3>
+  <p>Anthropic was founded by Dario Amodei (CEO), Daniela Amodei (President), and several former OpenAI researchers. They left OpenAI because they believed the AI industry was moving too fast without enough safety focus. Their guiding philosophy is called <strong>Constitutional AI (CAI)</strong> — a method of training Claude to follow a set of principles about being helpful, harmless, and honest rather than just optimizing for user engagement.</p>
+
+  <div class="callout tip">
+    <div class="callout-icon">💡</div>
+    <div class="callout-body">
+      <h5>Pro Tip: Why this matters to you</h5>
+      <p>Claude's safety-first design means it's less likely to hallucinate confidently, more likely to say "I'm not sure," and consistently more reliable for business-critical work. That's a huge advantage over competitors.</p>
+    </div>
+  </div>
+
+  <h3>Claude vs. The Competition</h3>
+  <div class="table-wrap">
+    <table>
+      <tr><th>Feature</th><th>Claude (Anthropic)</th><th>ChatGPT (OpenAI)</th><th>Gemini (Google)</th><th>Copilot (Microsoft)</th></tr>
+      <tr><td><strong>Primary Focus</strong></td><td><span class="tag tag-teal">Safety + Helpfulness</span></td><td>General-purpose AI</td><td>Google Ecosystem</td><td>Microsoft 365</td></tr>
+      <tr><td><strong>Context Window</strong></td><td>200K tokens (Sonnet/Opus)</td><td>128K tokens</td><td>1M tokens (Gemini 1.5)</td><td>128K tokens</td></tr>
+      <tr><td><strong>Coding</strong></td><td>⭐⭐⭐⭐⭐</td><td>⭐⭐⭐⭐</td><td>⭐⭐⭐</td><td>⭐⭐⭐⭐</td></tr>
+      <tr><td><strong>Long Document Analysis</strong></td><td>⭐⭐⭐⭐⭐</td><td>⭐⭐⭐</td><td>⭐⭐⭐⭐⭐</td><td>⭐⭐⭐</td></tr>
+      <tr><td><strong>Writing Quality</strong></td><td>⭐⭐⭐⭐⭐</td><td>⭐⭐⭐⭐</td><td>⭐⭐⭐</td><td>⭐⭐⭐</td></tr>
+      <tr><td><strong>API Access</strong></td><td>Yes (all plans)</td><td>Yes</td><td>Yes</td><td>Limited</td></tr>
+      <tr><td><strong>Training Philosophy</strong></td><td>Constitutional AI</td><td>RLHF</td><td>RLHF + RLAIF</td><td>RLHF (GPT-4 based)</td></tr>
+    </table>
+  </div>
+
+  <h3>How Claude Works — Plain English</h3>
+  <p>Claude is a <strong>Large Language Model (LLM)</strong>. Here's the simple version: Claude was trained on an enormous amount of text — books, websites, code, conversations — and learned the patterns of human language so well that it can generate coherent, contextually relevant responses. When you type a message, Claude reads every word, understands the intent, and generates the most appropriate response token by token.</p>
+
+  <div class="callout warning">
+    <div class="callout-icon">⚠️</div>
+    <div class="callout-body">
+      <h5>Important Limitation to Know</h5>
+      <p>Claude has a <strong>knowledge cutoff date</strong> — it doesn't browse the internet in real time unless you enable web search. It can also occasionally make mistakes (called "hallucinations"). Always verify critical facts independently.</p>
+    </div>
+  </div>
+
+  <h3>Key Capabilities at a Glance</h3>
+  <div class="feature-list">
+    <span class="feature-badge">Long document analysis</span>
+    <span class="feature-badge">Code generation & debugging</span>
+    <span class="feature-badge">Data analysis & visualization</span>
+    <span class="feature-badge">Creative writing</span>
+    <span class="feature-badge">Research summarization</span>
+    <span class="feature-badge">Multi-language support</span>
+    <span class="feature-badge">API integration</span>
+    <span class="feature-badge">Math & logic reasoning</span>
+    <span class="feature-badge">Business strategy</span>
+    <span class="feature-badge">Image understanding</span>
+    <span class="feature-badge">Web search (with tools)</span>
+    <span class="feature-badge">PDF & file analysis</span>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ═══════════════════════════════════════════
+     SECTION 2 – ECOSYSTEM
+═══════════════════════════════════════════ -->
+<section id="ecosystem">
+  <div class="section-header">
+    <div class="section-num">02</div>
+    <div class="section-title-block">
+      <h2>Claude Ecosystem Overview</h2>
+      <p class="section-desc">Every product, tool, and surface — explained</p>
+    </div>
+  </div>
+
+  <p>Claude is not just one product — it's an entire ecosystem of tools designed for different users: casual users, power users, developers, and enterprises. Here's the full map.</p>
+
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-icon bg-teal">🌐</div>
+      <h4>Claude.ai</h4>
+      <p>The main web & mobile chat interface. Drag-and-drop files, manage projects, use artifacts. Entry point for most users.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon bg-amber">🎨</div>
+      <h4>Claude Artifacts</h4>
+      <p>Interactive outputs — Claude can generate websites, dashboards, React apps, and documents directly inside the chat.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon bg-rose">💻</div>
+      <h4>Claude Code</h4>
+      <p>Terminal-based AI coding agent. Reads your codebase, writes code, runs commands, and ships features autonomously.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon bg-purple">🔌</div>
+      <h4>MCP (Model Context Protocol)</h4>
+      <p>Open standard for connecting Claude to any tool, API, or database. The foundation of AI agent workflows.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon bg-navy">📁</div>
+      <h4>Claude Projects</h4>
+      <p>Persistent workspaces with uploaded documents, custom instructions, and shared team access for ongoing work.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon bg-green">🔗</div>
+      <h4>Claude Connectors</h4>
+      <p>Native integrations with Google Drive, Slack, GitHub, Notion, Jira, and more — no code required.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon bg-teal">⚙️</div>
+      <h4>Claude API</h4>
+      <p>Build Claude directly into your own products. REST API, Python SDK, JavaScript SDK with streaming support.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon bg-amber">🖥️</div>
+      <h4>Claude Desktop</h4>
+      <p>Native desktop app for macOS and Windows with MCP server support for deep local file and tool access.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon bg-navy">🏢</div>
+      <h4>Claude Enterprise</h4>
+      <p>Custom deployments with SSO, audit logs, data privacy controls, extended context, and dedicated support.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon bg-purple">📱</div>
+      <h4>Claude Mobile</h4>
+      <p>iOS and Android apps with full chat capability, file sharing, voice input, and camera integration.</p>
+    </div>
+  </div>
+
+  <div class="callout tip">
+    <div class="callout-icon">💡</div>
+    <div class="callout-body">
+      <h5>Pro Tip: Which Product Should You Start With?</h5>
+      <ul>
+        <li><strong>Everyday tasks & learning:</strong> Claude.ai (Free or Pro)</li>
+        <li><strong>Software development:</strong> Claude Code</li>
+        <li><strong>Team collaboration:</strong> Claude Team + Projects</li>
+        <li><strong>Building AI products:</strong> Claude API</li>
+        <li><strong>Enterprise deployments:</strong> Claude Enterprise</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ═══════════════════════════════════════════
+     SECTION 3 – CLAUDE.AI PLATFORM
+═══════════════════════════════════════════ -->
+<section id="claudeai">
+  <div class="section-header">
+    <div class="section-num">03</div>
+    <div class="section-title-block">
+      <h2>Claude.ai Platform</h2>
+      <p class="section-desc">Your day-to-day AI workspace — from chat to complex research</p>
+    </div>
+  </div>
+
+  <h3>The Interface — A Quick Tour</h3>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num"></div>
+      <div class="step-body">
+        <h5>New Conversation</h5>
+        <p>Start a fresh chat for any task. Claude has no memory between conversations by default — each chat starts fresh unless you're in a Project.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num"></div>
+      <div class="step-body">
+        <h5>File Uploads</h5>
+        <p>Drag and drop PDFs, Excel files, images, CSVs, code files. Claude reads and analyzes them instantly. Pro users can upload multiple files at once.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num"></div>
+      <div class="step-body">
+        <h5>Projects</h5>
+        <p>Create a Project for ongoing work (e.g., "Q3 Marketing Campaign"). Add documents, set custom instructions, and invite teammates. All chats inside a Project share context.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num"></div>
+      <div class="step-body">
+        <h5>Web Search</h5>
+        <p>Enable web search in settings and Claude will pull real-time information from the internet to supplement its answers.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num"></div>
+      <div class="step-body">
+        <h5>Artifacts Panel</h5>
+        <p>When Claude creates a document, website, or app, it appears in a side panel you can preview, copy, or download.</p>
+      </div>
+    </div>
+  </div>
+
+  <h3>Practical Workflows by Role</h3>
+
+  <h4>📣 Marketing</h4>
+  <p>Upload a product brief → ask Claude to write 5 ad copy variations → ask it to adapt them for LinkedIn, email, and Google Ads → copy the best into your CMS. The entire workflow takes 10 minutes instead of 2 hours.</p>
+
+  <h4>💻 Coding</h4>
+  <p>Paste your buggy function → ask Claude to identify the issue and fix it → ask for unit tests → ask for documentation. No need to search Stack Overflow.</p>
+
+  <h4>📊 Data Analysis</h4>
+  <p>Upload your CSV → ask "What are the top 3 trends in this data?" → ask for a Python script to visualize it → ask for an executive summary. All without touching a BI tool.</p>
+
+  <div class="callout tip">
+    <div class="callout-icon">💡</div>
+    <div class="callout-body">
+      <h5>Prompting Best Practices</h5>
+      <ul>
+        <li><strong>Be specific:</strong> "Write a 300-word LinkedIn post about our Q3 launch targeting CMOs" beats "write a post"</li>
+        <li><strong>Give context:</strong> Tell Claude your role, audience, and goal</li>
+        <li><strong>Use examples:</strong> Paste in a sample you like and say "write in this style"</li>
+        <li><strong>Iterate:</strong> "Make it more conversational" or "Add a CTA" — Claude holds context</li>
+        <li><strong>Use XML tags for complex tasks:</strong> <code>&lt;instructions&gt;</code>, <code>&lt;context&gt;</code>, <code>&lt;format&gt;</code></li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>Good Prompt vs. Bad Prompt</h3>
+  <div class="compare">
+    <div class="compare-bad">
+      <div class="compare-label">❌ Vague — Poor Result</div>
+      <p>"Analyze my data and give me insights."</p>
+    </div>
+    <div class="compare-good">
+      <div class="compare-label">✅ Specific — Great Result</div>
+      <p>"I'm a marketing manager at a supplement brand. Here's our weekly sales CSV [attached]. Identify the top 3 SKUs by revenue, flag any weeks with >10% decline, and write a 1-paragraph executive summary suitable for a board report."</p>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ═══════════════════════════════════════════
+     SECTION 4 – ARTIFACTS
+═══════════════════════════════════════════ -->
+<section id="artifacts">
+  <div class="section-header">
+    <div class="section-num">04</div>
+    <div class="section-title-block">
+      <h2>Claude Artifacts</h2>
+      <p class="section-desc">Turn conversations into working apps, dashboards, and documents</p>
+    </div>
+  </div>
+
+  <p>Artifacts are Claude's superpower. Instead of just giving you text, Claude can generate <strong>interactive, shareable, downloadable outputs</strong> right inside the chat — HTML pages, React components, SVG diagrams, Markdown reports, and more.</p>
+
+  <h3>Types of Artifacts</h3>
+  <div class="card-grid card-grid-3">
+    <div class="card">
+      <div class="card-icon bg-teal">🌐</div>
+      <h4>HTML / Web Apps</h4>
+      <p>Fully functional websites with CSS and JavaScript. Can be shared via link or downloaded.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon bg-amber">⚛️</div>
+      <h4>React Components</h4>
+      <p>Interactive UI components with state, charts (Recharts), and data tables — no build step needed.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon bg-rose">📊</div>
+      <h4>Dashboards</h4>
+      <p>Upload your data → get a working dashboard with charts, KPI cards, and filters.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon bg-purple">📄</div>
+      <h4>Markdown Documents</h4>
+      <p>Formatted reports, proposals, SOPs — instantly downloadable.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon bg-navy">🔷</div>
+      <h4>SVG Diagrams</h4>
+      <p>Process flows, architecture diagrams, org charts — rendered as scalable graphics.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon bg-green">🧮</div>
+      <h4>Calculators & Tools</h4>
+      <p>ROI calculators, budget planners, custom tools — built in one prompt.</p>
+    </div>
+  </div>
+
+  <h3>Real-World Artifact Examples</h3>
+
+  <h4>Example 1 — Marketing Dashboard</h4>
+  <div class="callout note">
+    <div class="callout-icon">💬</div>
+    <div class="callout-body">
+      <h5>Prompt used:</h5>
+      <p>"Build a weekly performance dashboard for our Amazon Sponsored Products campaigns. Include KPI cards for Impressions, Clicks, ACOS, and Revenue. Add a line chart for weekly trends. Use purple and teal branding."</p>
+    </div>
+  </div>
+  <p><strong>Result:</strong> A fully functional HTML dashboard with Chart.js charts, styled cards, and a clean layout — in under 30 seconds.</p>
+
+  <h4>Example 2 — Interactive Calculator</h4>
+  <div class="callout note">
+    <div class="callout-icon">💬</div>
+    <div class="callout-body">
+      <h5>Prompt used:</h5>
+      <p>"Create an ROAS calculator. User inputs Ad Spend and Revenue, and it shows ROAS, CPC, and whether the campaign is profitable based on a 3.0 target ROAS."</p>
+    </div>
+  </div>
+
+  <h3>When to Use Artifacts</h3>
+  <div class="table-wrap">
+    <table>
+      <tr><th>Use Artifact When…</th><th>Use Regular Chat When…</th></tr>
+      <tr><td>You need something interactive or visual</td><td>You just need a text answer or explanation</td></tr>
+      <tr><td>You want to share output with a non-Claude user</td><td>The output is for your own reading only</td></tr>
+      <tr><td>Output is > 20 lines or is standalone content</td><td>Short answers, lists, brief analysis</td></tr>
+      <tr><td>You need a document, report, or app</td><td>Quick Q&A or brainstorming</td></tr>
+    </table>
+  </div>
+
+  <div class="callout mistake">
+    <div class="callout-icon">🚫</div>
+    <div class="callout-body">
+      <h5>Common Mistakes to Avoid</h5>
+      <ul>
+        <li>Don't ask for an Artifact without giving enough context — Claude needs to know the audience, branding, and data structure</li>
+        <li>Don't forget to specify the format (HTML vs React vs Markdown) for best results</li>
+        <li>Don't treat Artifacts as final without reviewing — always iterate ("make the charts taller", "add a dark mode toggle")</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ═══════════════════════════════════════════
+     SECTION 5 – CLAUDE CODE
+═══════════════════════════════════════════ -->
+<section id="code">
+  <div class="section-header">
+    <div class="section-num">05</div>
+    <div class="section-title-block">
+      <h2>Claude Code</h2>
+      <p class="section-desc">AI-powered coding agent that lives in your terminal</p>
+    </div>
+  </div>
+
+  <p>Claude Code is a command-line tool where Claude acts as an autonomous coding agent. It doesn't just suggest code — it <strong>reads your entire codebase, writes files, runs commands, and ships features</strong>, pausing to ask for permission on risky operations.</p>
+
+  <h3>Installing Claude Code</h3>
+  <pre><code># Install globally via npm
+npm install -g @anthropic-ai/claude-code
+
+# Navigate to your project
+cd my-project
+
+# Launch Claude Code
+claude</code></pre>
+
+  <h3>What Claude Code Can Do</h3>
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-icon bg-teal">🔍</div>
+      <h4>Codebase Understanding</h4>
+      <p>Reads every file in your project to understand architecture before making changes.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon bg-amber">🐛</div>
+      <h4>Bug Fixing</h4>
+      <p>Tell it the bug, it traces through code, finds the root cause, and writes the fix.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon bg-rose">🔄</div>
+      <h4>Refactoring</h4>
+      <p>"Refactor this module to use TypeScript" or "Extract this logic into a reusable hook."</p>
+    </div>
+    <div class="card">
+      <div class="card-icon bg-purple">📝</div>
+      <h4>Documentation</h4>
+      <p>Auto-generates README files, inline comments, JSDoc, and API documentation.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon bg-navy">🧪</div>
+      <h4>Test Generation</h4>
+      <p>Writes unit tests, integration tests, and edge cases — including tests you'd forget.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon bg-green">🚀</div>
+      <h4>Feature Development</h4>
+      <p>"Add a dark mode toggle" → Claude creates the CSS, state logic, and toggle button.</p>
+    </div>
+  </div>
+
+  <h3>Practical Examples</h3>
+
+  <h4>Python Automation Example</h4>
+  <pre><code># Tell Claude Code:
+"Write a Python script that reads sales data from a CSV,
+calculates weekly revenue by product category, and exports
+a summary Excel file with a pivot table."
+
+# Claude Code will:
+# 1. Check if pandas/openpyxl are installed
+# 2. Write the complete script
+# 3. Run it and check for errors
+# 4. Fix any issues automatically</code></pre>
+
+  <h4>Marketing Automation Example</h4>
+  <pre><code># Tell Claude Code:
+"Build a Google Ads performance report generator using the 
+Google Ads API. Fetch last 30 days of campaign data, 
+calculate ROAS by campaign, and export to Excel with 
+conditional formatting for campaigns below 2.0 ROAS."</code></pre>
+
+  <div class="callout tip">
+    <div class="callout-icon">💡</div>
+    <div class="callout-body">
+      <h5>Pro Tips for Claude Code</h5>
+      <ul>
+        <li>Start every session with: <strong>"Read the README and understand this project first"</strong></li>
+        <li>Use <code>/plan</code> before big changes to see Claude's approach before it executes</li>
+        <li>Enable git integration so every change is trackable</li>
+        <li>Be specific: "Add error handling for network timeouts" is better than "make it more robust"</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ═══════════════════════════════════════════
+     SECTION 6 – MCP
+═══════════════════════════════════════════ -->
+<section id="mcp">
+  <div class="section-header">
+    <div class="section-num">06</div>
+    <div class="section-title-block">
+      <h2>MCP — Model Context Protocol</h2>
+      <p class="section-desc">The open standard that lets Claude talk to any tool or system</p>
+    </div>
+  </div>
+
+  <p>MCP is an open protocol that gives Claude the ability to <strong>connect to external tools, databases, APIs, and services</strong>. Think of it like a universal adapter — once a tool has an MCP server, Claude can use it natively.</p>
+
+  <div class="callout note">
+    <div class="callout-icon">🔌</div>
+    <div class="callout-body">
+      <h5>Simple Analogy</h5>
+      <p>MCP is like USB-C for AI. Just as USB-C lets you plug any device into any laptop, MCP lets Claude connect to any tool — CRMs, databases, file systems, APIs — using a single standardized interface.</p>
+    </div>
+  </div>
+
+  <h3>How MCP Works</h3>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num"></div>
+      <div class="step-body">
+        <h5>MCP Server</h5>
+        <p>A lightweight server that exposes a tool's capabilities. For example, a Google Sheets MCP server exposes "read spreadsheet", "write cell", "create chart" as actions.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num"></div>
+      <div class="step-body">
+        <h5>Claude Connects</h5>
+        <p>Claude Desktop or Claude Code connects to these MCP servers. Claude now "knows" these tools exist and can use them in conversations.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num"></div>
+      <div class="step-body">
+        <h5>You Ask, Claude Acts</h5>
+        <p>"Pull the last 30 days of sales from our database, find the top SKUs, and update the Google Sheet dashboard" — Claude does all three steps automatically.</p>
+      </div>
+    </div>
+  </div>
+
+  <h3>Popular MCP Integrations</h3>
+  <div class="table-wrap">
+    <table>
+      <tr><th>MCP Server</th><th>What It Enables</th><th>Use Case</th></tr>
+      <tr><td><strong>Google Sheets MCP</strong></td><td>Read/write/create spreadsheets</td><td>Automated reporting, data pipelines</td></tr>
+      <tr><td><strong>Slack MCP</strong></td><td>Send messages, read channels, post summaries</td><td>Daily standup summaries, alert routing</td></tr>
+      <tr><td><strong>GitHub MCP</strong></td><td>Create PRs, read issues, update files</td><td>Code reviews, automated changelog</td></tr>
+      <tr><td><strong>Postgres/MySQL MCP</strong></td><td>Query databases with natural language</td><td>Business intelligence, ad-hoc analytics</td></tr>
+      <tr><td><strong>Jira MCP</strong></td><td>Create/update tickets, sprint planning</td><td>Project management automation</td></tr>
+      <tr><td><strong>Notion MCP</strong></td><td>Read/write Notion pages and databases</td><td>Knowledge management, documentation</td></tr>
+    </table>
+  </div>
+
+  <h3>Retail Media Automation Example with MCP</h3>
+  <div class="callout note">
+    <div class="callout-icon">🛒</div>
+    <div class="callout-body">
+      <h5>Workflow: Automated Weekly Ad Report</h5>
+      <p>Using Amazon Ads MCP + Google Sheets MCP + Slack MCP:</p>
+      <ul>
+        <li>Claude fetches last week's campaign data from Amazon Ads API</li>
+        <li>Calculates ACOS, ROAS, CPC, and impression share by campaign</li>
+        <li>Updates the Google Sheet dashboard with new numbers</li>
+        <li>Generates an executive summary in plain English</li>
+        <li>Posts the summary to the #marketing-reports Slack channel</li>
+      </ul>
+      <p style="margin-top:8px"><strong>Time saved: ~4 hours/week per analyst</strong></p>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ═══════════════════════════════════════════
+     SECTION 7 – CONNECTORS
+═══════════════════════════════════════════ -->
+<section id="connectors">
+  <div class="section-header">
+    <div class="section-num">07</div>
+    <div class="section-title-block">
+      <h2>Connectors & Integrations</h2>
+      <p class="section-desc">Native plug-and-play connections — no code required</p>
+    </div>
+  </div>
+
+  <p>Claude Connectors are <strong>pre-built integrations</strong> available inside Claude.ai that require no technical setup. Toggle them on, authenticate, and Claude immediately gains access to your data.</p>
+
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-icon bg-amber">📁</div>
+      <h4>Google Drive</h4>
+      <p>Claude reads your Docs, Sheets, and Slides. Ask: "Summarize all Q3 reports in this folder."</p>
+    </div>
+    <div class="card">
+      <div class="card-icon bg-teal">💬</div>
+      <h4>Slack</h4>
+      <p>Search messages, summarize threads, draft replies. "What decisions were made in #strategy this week?"</p>
+    </div>
+    <div class="card">
+      <div class="card-icon bg-rose">🐙</div>
+      <h4>GitHub</h4>
+      <p>Read repos, review PRs, understand code changes. "Explain what changed in the last 5 commits."</p>
+    </div>
+    <div class="card">
+      <div class="card-icon bg-purple">📋</div>
+      <h4>Notion</h4>
+      <p>Browse your Notion workspace, pull data from databases, create summaries of pages.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon bg-navy">🎯</div>
+      <h4>Jira</h4>
+      <p>Read and create tickets. "Create a Jira story for the login bug we just discussed."</p>
+    </div>
+    <div class="card">
+      <div class="card-icon bg-green">📊</div>
+      <h4>Google Sheets</h4>
+      <p>Read and analyze spreadsheet data in real time without downloading files.</p>
+    </div>
+  </div>
+
+  <h3>Setting Up a Connector</h3>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num"></div>
+      <div class="step-body">
+        <h5>Open Claude.ai Settings</h5>
+        <p>Click your profile icon → Settings → Integrations (or Connectors section).</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num"></div>
+      <div class="step-body">
+        <h5>Choose the Connector</h5>
+        <p>Select Google Drive, Slack, GitHub, etc. from the available list.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num"></div>
+      <div class="step-body">
+        <h5>Authenticate</h5>
+        <p>Click Connect and complete OAuth authentication. Claude gets read-only access by default.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num"></div>
+      <div class="step-body">
+        <h5>Start Using It</h5>
+        <p>In any chat, mention the integration: "Looking at my Google Drive…" and Claude will fetch the relevant data.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ═══════════════════════════════════════════
+     SECTION 8 – PLANS & PRICING
+═══════════════════════════════════════════ -->
+<section id="plans">
+  <div class="section-header">
+    <div class="section-num">08</div>
+    <div class="section-title-block">
+      <h2>Plans, Models & Pricing</h2>
+      <p class="section-desc">Find the right tier for your needs and budget</p>
+    </div>
+  </div>
+
+  <h3>Plan Comparison</h3>
+  <div class="table-wrap">
+    <table>
+      <tr><th>Feature</th><th>Free</th><th>Pro ($20/mo)</th><th>Team ($30/user/mo)</th><th>Enterprise (Custom)</th></tr>
+      <tr><td><strong>Message Limit</strong></td><td>Limited</td><td>5× more than Free</td><td>Higher limits</td><td>Highest / Custom</td></tr>
+      <tr><td><strong>Model Access</strong></td><td>Claude Sonnet</td><td>All models incl. Opus</td><td>All models</td><td>All models</td></tr>
+      <tr><td><strong>Context Window</strong></td><td>Standard</td><td>200K tokens</td><td>200K tokens</td><td>Extended / Custom</td></tr>
+      <tr><td><strong>Artifacts</strong></td><td>✓</td><td>✓</td><td>✓</td><td>✓</td></tr>
+      <tr><td><strong>Projects</strong></td><td>Limited</td><td>✓ Unlimited</td><td>✓ Team Projects</td><td>✓ Enterprise Projects</td></tr>
+      <tr><td><strong>Connectors</strong></td><td>Basic</td><td>✓</td><td>✓</td><td>✓ + Custom</td></tr>
+      <tr><td><strong>Priority Access</strong></td><td>✗</td><td>✓</td><td>✓</td><td>✓ Dedicated</td></tr>
+      <tr><td><strong>SSO / Admin Controls</strong></td><td>✗</td><td>✗</td><td>Basic</td><td>✓ Full SAML/SCIM</td></tr>
+      <tr><td><strong>Data Privacy</strong></td><td>Standard</td><td>Standard</td><td>✓ No training on data</td><td>✓ Full DPA + BAA</td></tr>
+      <tr><td><strong>Audit Logs</strong></td><td>✗</td><td>✗</td><td>Basic</td><td>✓ Comprehensive</td></tr>
+    </table>
+  </div>
+
+  <h3>Model Comparison — Which One Should You Use?</h3>
+  <div class="table-wrap">
+    <table>
+      <tr><th>Model</th><th>Speed</th><th>Intelligence</th><th>Cost</th><th>Best For</th></tr>
+      <tr>
+        <td><strong>Claude Haiku</strong></td>
+        <td><span class="tag tag-teal">⚡ Fastest</span></td>
+        <td>Good</td>
+        <td><span class="tag tag-teal">Lowest</span></td>
+        <td>High-volume tasks: customer support bots, simple Q&A, classification, summaries</td>
+      </tr>
+      <tr>
+        <td><strong>Claude Sonnet</strong></td>
+        <td><span class="tag tag-amber">🔥 Fast</span></td>
+        <td>Great</td>
+        <td>Medium</td>
+        <td>Everyday tasks: writing, coding, analysis, most business workflows. Best value.</td>
+      </tr>
+      <tr>
+        <td><strong>Claude Opus</strong></td>
+        <td><span class="tag tag-navy">🧠 Slower</span></td>
+        <td><span class="tag tag-teal">Best</span></td>
+        <td><span class="tag tag-rose">Highest</span></td>
+        <td>Complex reasoning: legal analysis, research synthesis, nuanced writing, hardest coding</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="callout tip">
+    <div class="callout-icon">💡</div>
+    <div class="callout-body">
+      <h5>Cost Optimization Tips for API Users</h5>
+      <ul>
+        <li>Use <strong>Haiku</strong> for first-pass filtering (is this email relevant?) and Sonnet for the actual work</li>
+        <li>Cache system prompts to save costs on repeated API calls</li>
+        <li>Use <strong>batch processing</strong> for non-urgent large-scale tasks (50% cheaper)</li>
+        <li>Compress your context: summarize old conversation history before appending it</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ═══════════════════════════════════════════
+     SECTION 9 – AUTOMATION
+═══════════════════════════════════════════ -->
+<section id="automation">
+  <div class="section-header">
+    <div class="section-num">09</div>
+    <div class="section-title-block">
+      <h2>Automation & Workflow Building</h2>
+      <p class="section-desc">Turn Claude into an always-on business automation engine</p>
+    </div>
+  </div>
+
+  <h3>The Automation Stack</h3>
+  <p>Claude automation works best when combined with orchestration tools. Here are the most common stacks:</p>
+
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-icon bg-teal">⚡</div>
+      <h4>Claude + Zapier</h4>
+      <p>Trigger Claude from 6,000+ apps. Email arrives → Claude summarizes it → posts to Slack. No code.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon bg-amber">🔧</div>
+      <h4>Claude + Make (Integromat)</h4>
+      <p>Visual workflow builder. More flexible than Zapier for complex multi-step automations.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon bg-rose">🐍</div>
+      <h4>Claude + Python</h4>
+      <p>For maximum control. Anthropic SDK makes API calls trivial. Best for data pipelines.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon bg-purple">🔌</div>
+      <h4>Claude + MCP Servers</h4>
+      <p>Multi-tool agents. Claude orchestrates across databases, APIs, and services autonomously.</p>
+    </div>
+  </div>
+
+  <h3>Complete Workflow: Automated Client Report</h3>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num"></div>
+      <div class="step-body">
+        <h5>Schedule Trigger (every Monday 8am)</h5>
+        <p>Zapier or cron job fires, triggering the automation pipeline.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num"></div>
+      <div class="step-body">
+        <h5>Data Collection</h5>
+        <p>Python script pulls data from Amazon Ads API, Google Analytics, and Meta Ads API.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num"></div>
+      <div class="step-body">
+        <h5>Claude Analysis</h5>
+        <p>Data is sent to Claude API with this prompt: "Analyze this week's performance. Identify top 3 wins, top 3 concerns, and 3 actionable recommendations. Write an executive summary."</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num"></div>
+      <div class="step-body">
+        <h5>Report Generation</h5>
+        <p>Claude's output is merged with a branded HTML template. Charts are generated automatically.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num"></div>
+      <div class="step-body">
+        <h5>Distribution</h5>
+        <p>Report is emailed to client and internal team. Slack notification sent with key metrics summary.</p>
+      </div>
+    </div>
+  </div>
+
+  <h3>Python API Quickstart</h3>
+  <pre><code>import anthropic
+
+client = anthropic.Anthropic(api_key="your-api-key")
+
+def analyze_campaign_data(data: str) -> str:
+    message = client.messages.create(
+        model="claude-sonnet-4-5",
+        max_tokens=1024,
+        messages=[
+            {
+                "role": "user",
+                "content": f"""You are a retail media analyst.
+                Analyze this campaign data and provide:
+                1. Top 3 performance insights
+                2. Campaigns needing urgent attention
+                3. Budget optimization recommendations
+                
+                Data: {data}"""
+            }
+        ]
+    )
+    return message.content[0].text
+
+# Use it
+result = analyze_campaign_data(your_csv_data)
+print(result)</code></pre>
+</section>
+
+<hr class="divider">
+
+<!-- ═══════════════════════════════════════════
+     SECTION 10 – BEST PRACTICES
+═══════════════════════════════════════════ -->
+<section id="bestpractices">
+  <div class="section-header">
+    <div class="section-num">10</div>
+    <div class="section-title-block">
+      <h2>Best Practices</h2>
+      <p class="section-desc">Work smarter, get better results, avoid common pitfalls</p>
+    </div>
+  </div>
+
+  <h3>Prompt Engineering Framework</h3>
+  <div class="table-wrap">
+    <table>
+      <tr><th>Component</th><th>What to Include</th><th>Example</th></tr>
+      <tr><td><strong>Role</strong></td><td>Tell Claude who it is</td><td>"You are a senior retail media analyst…"</td></tr>
+      <tr><td><strong>Context</strong></td><td>Background information</td><td>"Our client is a supplement brand on Amazon…"</td></tr>
+      <tr><td><strong>Task</strong></td><td>Specific action required</td><td>"Analyze this ACOS data and identify top 3 issues…"</td></tr>
+      <tr><td><strong>Format</strong></td><td>How output should look</td><td>"Respond in bullet points with headers, max 500 words"</td></tr>
+      <tr><td><strong>Constraints</strong></td><td>Rules to follow</td><td>"Avoid jargon, write for a CMO audience, use data to support claims"</td></tr>
+    </table>
+  </div>
+
+  <h3>Organize Your Work with Projects</h3>
+  <ul>
+    <li><strong>One Project per client/campaign:</strong> Keep context clean and separate</li>
+    <li><strong>Upload all reference docs upfront:</strong> Brand guidelines, past reports, data dictionaries</li>
+    <li><strong>Set clear system instructions:</strong> "Always respond in British English. Never suggest reducing ad spend below $5,000/week."</li>
+    <li><strong>Name conversations clearly:</strong> "Week 12 - ACOS Analysis" not "New chat"</li>
+  </ul>
+
+  <h3>Data Privacy Best Practices</h3>
+  <div class="callout warning">
+    <div class="callout-icon">⚠️</div>
+    <div class="callout-body">
+      <h5>Before Uploading Sensitive Data</h5>
+      <ul>
+        <li>On Free/Pro plans, Anthropic may use conversations for model training — anonymize sensitive data</li>
+        <li>Use Team or Enterprise plan for commercially sensitive client data</li>
+        <li>Never paste raw passwords, API keys, or PII into Claude chat</li>
+        <li>Use Enterprise plan for healthcare data (HIPAA) or financial data (SOC 2)</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>Common Mistakes to Avoid</h3>
+  <div class="callout mistake">
+    <div class="callout-icon">🚫</div>
+    <div class="callout-body">
+      <h5>Mistakes That Kill Your Results</h5>
+      <ul>
+        <li><strong>Accepting first output without iterating</strong> — Claude improves dramatically with feedback</li>
+        <li><strong>One giant prompt</strong> — Break complex tasks into sequential steps</li>
+        <li><strong>No context</strong> — "Write a report" gives nothing. "Write a 500-word executive summary of our Q3 Amazon Ads performance for our CEO" gives great output</li>
+        <li><strong>Treating Claude as a search engine</strong> — It reasons, not retrieves. Ask it to think, not just look up</li>
+        <li><strong>Not verifying outputs</strong> — Always check numbers, facts, and code for correctness before using</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ═══════════════════════════════════════════
+     SECTION 11 – INDUSTRY USE CASES
+═══════════════════════════════════════════ -->
+<section id="usecases">
+  <div class="section-header">
+    <div class="section-num">11</div>
+    <div class="section-title-block">
+      <h2>Industry Use Cases</h2>
+      <p class="section-desc">Real-world applications across every business function</p>
+    </div>
+  </div>
+
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-icon bg-rose">📣</div>
+      <h4>Digital Marketing</h4>
+      <p>Ad copy at scale, SEO content, campaign analysis, competitor research, A/B test analysis, influencer outreach drafts.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon bg-amber">🛒</div>
+      <h4>Retail Media</h4>
+      <p>ACOS/ROAS reporting, keyword mining, bid strategy recommendations, campaign audits, weekly performance narratives.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon bg-teal">🛍️</div>
+      <h4>eCommerce</h4>
+      <p>Product description generation, review analysis, inventory forecasting narratives, supplier email drafts, customer FAQ creation.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon bg-purple">💻</div>
+      <h4>Software Development</h4>
+      <p>Code review, bug fixing, architecture planning, PR descriptions, test generation, legacy code explanation.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon bg-navy">📊</div>
+      <h4>Data Analytics</h4>
+      <p>SQL query generation, data story writing, chart interpretation, statistical analysis, dashboard design.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon bg-green">🤝</div>
+      <h4>HR & Recruitment</h4>
+      <p>Job description writing, CV screening frameworks, interview question generation, offer letter drafting, onboarding docs.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon bg-teal">💬</div>
+      <h4>Customer Support</h4>
+      <p>Response templates, ticket classification, FAQ document generation, escalation summaries, customer email drafting.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon bg-amber">📚</div>
+      <h4>Education</h4>
+      <p>Course material creation, quiz generation, essay feedback, tutoring simulations, lesson plan writing.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon bg-rose">💰</div>
+      <h4>Finance</h4>
+      <p>Financial report analysis, earnings call summaries, budget narrative writing, variance explanation, forecast commentary.</p>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ═══════════════════════════════════════════
+     SECTION 12 – FUTURE
+═══════════════════════════════════════════ -->
+<section id="future">
+  <div class="section-header">
+    <div class="section-num">12</div>
+    <div class="section-title-block">
+      <h2>Future of Claude AI</h2>
+      <p class="section-desc">Where the technology is heading and what to prepare for</p>
+    </div>
+  </div>
+
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-icon bg-teal">🤖</div>
+      <h4>AI Agents</h4>
+      <p>Claude will increasingly operate autonomously — browsing, executing, and reporting — with minimal human intervention in defined workflows.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon bg-amber">🌐</div>
+      <h4>MCP Ecosystem Growth</h4>
+      <p>Thousands of MCP servers will enable Claude to connect to nearly any business system — from ERP to point-of-sale to IoT sensors.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon bg-rose">👥</div>
+      <h4>AI Co-Workers</h4>
+      <p>Claude will have persistent identity in team tools — attending meetings, taking action items, sending follow-ups, and learning team preferences over time.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon bg-purple">🧠</div>
+      <h4>Longer Context & Memory</h4>
+      <p>Million-token contexts and persistent cross-session memory will make Claude a true organizational knowledge system — not just a conversation tool.</p>
+    </div>
+  </div>
+
+  <div class="callout tip">
+    <div class="callout-icon">💡</div>
+    <div class="callout-body">
+      <h5>How to Prepare for the Agentic AI Era</h5>
+      <ul>
+        <li>Start documenting your workflows so AI can eventually own them</li>
+        <li>Learn prompt engineering now — it's the control interface for AI agents</li>
+        <li>Experiment with MCP today so you understand the architecture before it's mainstream</li>
+        <li>Identify the 3 most repetitive tasks in your job — those are AI automation targets</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ═══════════════════════════════════════════
+     SECTION 13 – LEARNING PATH
+═══════════════════════════════════════════ -->
+<section id="roadmap">
+  <div class="section-header">
+    <div class="section-num">13</div>
+    <div class="section-title-block">
+      <h2>Your Learning Path</h2>
+      <p class="section-desc">A clear roadmap from first message to AI architect</p>
+    </div>
+  </div>
+
+  <h3>🌱 Beginner Roadmap (Week 1–2)</h3>
+  <div class="roadmap">
+    <div class="roadmap-item">
+      <h5>Sign up at Claude.ai</h5>
+      <p>Start with the free plan. Explore the interface and try your first prompt.</p>
+    </div>
+    <div class="roadmap-item">
+      <h5>Learn the basics of prompting</h5>
+      <p>Practice giving context, specifying format, and iterating on outputs. Try: role, task, format.</p>
+    </div>
+    <div class="roadmap-item">
+      <h5>Upload your first document</h5>
+      <p>Upload a PDF report and ask Claude to summarize it, extract key data, or answer questions about it.</p>
+    </div>
+    <div class="roadmap-item">
+      <h5>Create your first Artifact</h5>
+      <p>Ask Claude to build a simple HTML calculator or a markdown report for something you need at work.</p>
+    </div>
+    <div class="roadmap-item">
+      <h5>Set up a Project</h5>
+      <p>Create a project for an ongoing task. Add documents and set custom instructions.</p>
+    </div>
+  </div>
+
+  <h3>🚀 Intermediate Roadmap (Week 3–6)</h3>
+  <div class="roadmap">
+    <div class="roadmap-item">
+      <h5>Upgrade to Pro and explore all models</h5>
+      <p>Compare Haiku vs Sonnet vs Opus on the same task. Understand where each shines.</p>
+    </div>
+    <div class="roadmap-item">
+      <h5>Connect your first integration</h5>
+      <p>Link Google Drive or Slack and ask Claude about your actual business data.</p>
+    </div>
+    <div class="roadmap-item">
+      <h5>Build a workflow automation</h5>
+      <p>Use Zapier + Claude to automate a repetitive task — email summarization, report generation, etc.</p>
+    </div>
+    <div class="roadmap-item">
+      <h5>Master prompt engineering</h5>
+      <p>Study XML-tagged prompts, few-shot examples, and chain-of-thought techniques.</p>
+    </div>
+  </div>
+
+  <h3>🏗️ Advanced / Developer Roadmap (Week 7–12)</h3>
+  <div class="roadmap">
+    <div class="roadmap-item">
+      <h5>Get API access</h5>
+      <p>Sign up at console.anthropic.com. Run your first API call with the Python SDK.</p>
+    </div>
+    <div class="roadmap-item">
+      <h5>Install Claude Code</h5>
+      <p>Use it on a real project. Let Claude refactor a module or write test coverage.</p>
+    </div>
+    <div class="roadmap-item">
+      <h5>Build your first MCP server</h5>
+      <p>Connect Claude to your company's database or internal tool using the MCP SDK.</p>
+    </div>
+    <div class="roadmap-item">
+      <h5>Design an AI agent workflow</h5>
+      <p>Create a multi-step agent that autonomously completes a business task end-to-end.</p>
+    </div>
+    <div class="roadmap-item">
+      <h5>Implement at scale</h5>
+      <p>Evaluate Enterprise plan. Implement SSO, audit logging, and team-wide AI governance policies.</p>
+    </div>
+  </div>
+
+  <h3>Implementation Checklist</h3>
+  <div class="table-wrap">
+    <table>
+      <tr><th>Phase</th><th>Task</th><th>Status</th></tr>
+      <tr><td>Setup</td><td>Created Claude.ai account</td><td><span class="tag tag-teal">Quick Win</span></td></tr>
+      <tr><td>Setup</td><td>Explored Projects and Artifacts</td><td><span class="tag tag-teal">Quick Win</span></td></tr>
+      <tr><td>Integration</td><td>Connected at least one Connector</td><td><span class="tag tag-amber">Week 1</span></td></tr>
+      <tr><td>Automation</td><td>Built first automated workflow</td><td><span class="tag tag-amber">Week 2–3</span></td></tr>
+      <tr><td>Development</td><td>Made first API call</td><td><span class="tag tag-rose">Advanced</span></td></tr>
+      <tr><td>Development</td><td>Installed and used Claude Code</td><td><span class="tag tag-rose">Advanced</span></td></tr>
+      <tr><td>Enterprise</td><td>Set up MCP integration</td><td><span class="tag tag-navy">Expert</span></td></tr>
+      <tr><td>Enterprise</td><td>Deployed AI agent workflow</td><td><span class="tag tag-navy">Expert</span></td></tr>
+    </table>
+  </div>
+
+  <div class="callout tip">
+    <div class="callout-icon">🎯</div>
+    <div class="callout-body">
+      <h5>Final Pro Tip: Start Before You're Ready</h5>
+      <p>The best way to learn Claude is to use it on real problems — not toy examples. Pick the most annoying, repetitive task in your week, describe it to Claude, and see what happens. You'll be surprised how quickly it becomes indispensable.</p>
+    </div>
+  </div>
+</section>
+
+</div><!-- end content-wrap -->
+
+<footer>
+  <p>Claude AI Master Guide — Anthropic 2025 Edition</p>
+  <p style="margin-top:6px">Built with ♥ for every level of Claude user — from first-timers to enterprise architects</p>
+</footer>
+
+</main><!-- end main -->
+
+<script>
+// Active nav link highlight on scroll
+const sections = document.querySelectorAll('section[id]');
+const navLinks = document.querySelectorAll('.nav-link');
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      navLinks.forEach(l => l.classList.remove('active'));
+      const active = document.querySelector(`.nav-link[href="#${entry.target.id}"]`);
+      if (active) active.classList.add('active');
+    }
+  });
+}, { threshold: 0.3 });
+
+sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>
